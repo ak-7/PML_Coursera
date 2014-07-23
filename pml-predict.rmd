@@ -1,0 +1,64 @@
+Title
+========================================================
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring web pages (click the **Help** toolbar button for more details on using R Markdown).
+
+When you click the **Knit HTML** button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r fig.width=4,fig.height=3}
+library(caret)
+library(kernlab)
+library(randomForest)
+training<-read.csv("pml-training.csv",header=TRUE);
+testing<-read.csv("pml-testing.csv",header=TRUE);
+
+#To resample data. Remove columns.
+nearZeroCol<-nearZeroVar(training,freqCut=20,uniqueCut=20) 
+trainDescr<-training[,-nearZeroCol]
+testDescr<-testing[,-nearZeroCol]
+
+#colNumeric stores numeric based columns
+colNumeric<-Filter(is.numeric,trainDescr)
+trainDescr<-colNumeric
+
+#Finding correlation
+descrCorr <- cor(trainDescr)
+highCorr <- findCorrelation(descrCorr, 0.90)
+trainDescr <- trainDescr[, -highCorr]
+testDescr <- testDescr[, -highCorr]
+ncol(trainDescr)
+
+#Bind classe variable
+trainDescr<-cbind(trainDescr,classe=training[,59]);
+
+#creatingcross validation set
+inTrain<-createDataPartition(trainDescr$classe,p=0.75,list=FALSE)
+train<-trainDescr[inTrain,]
+valid<-trainDescr[-inTrain,]
+
+#randomForests
+modfit<-randomForest(classe~.,data=train)
+predVal<-predict(modfit,valid)
+predTesT<-predict(modfit,testDescr)
+
+#summary
+modfit
+
+##Calculate accuracy between cross validation set
+#Gives number of instances of each Level A B C D E in the cross validation set
+table(valid$classe)
+#Gives number of instances of each Level A B C D E in the predicted model
+table(predVal)
+#prints the confusion matrix
+confusionMatrix(predVal,valid$classe)
+
+
+
+```
+
+You can also embed plots, for example:
+
+```{r fig.width=7, fig.height=6}
+plot(modfit,type="p")
+```
+
