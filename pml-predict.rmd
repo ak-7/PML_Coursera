@@ -41,7 +41,7 @@ modfit<-randomForest(classe~.,data=train)
 predVal<-predict(modfit,valid)
 predTesT<-predict(modfit,testDescr)
 
-#summary
+#summary- error rate - 0.11%
 modfit
 
 ##Calculate accuracy between cross validation set
@@ -51,6 +51,8 @@ table(valid$classe)
 table(predVal)
 #prints the confusion matrix
 confusionMatrix(predVal,valid$classe)
+
+#OutofSample error is expected to be low as the error rate was 0.07%. We see the accuracy of the Cross Validation set is 99.9% and hence Out of Sample Error= 0.1%
 
 
 
